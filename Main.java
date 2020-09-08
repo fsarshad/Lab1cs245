@@ -1,17 +1,21 @@
 package main;
 
-// this method is what executes the program
-// it calls the methods from the solver.java class.
+import main.util.PuzzlePrintUtils;
 
-public class Main {
-    public static void main(String[] args)
-    {
-        Solver solver = new Solver();
-        solver.playPuzzle();
+public class Main
+{
+	public static void main(String[] args)
+	{
+		Solver solver = new Solver();
 
-    }
-    public static void partialInput(int[][] req){
-        Solver solver = new Solver();
-        solver.playPuzzle(req);
-    }
+		/**
+		 * Put your partially filled puzzle here to print it out first
+		 */
+		//PuzzlePrintUtils.printPuzzle( ** partial puzzle here ** );
+
+		/**
+		 * Solve your partially filled puzzle here
+		 */
+		//solver.solveWithPartial( ** partial puzzle here ** );
+	}
 }

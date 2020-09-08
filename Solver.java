@@ -1,196 +1,232 @@
 package main;
 
-import java.util.Random;
+import main.util.PuzzleCompleteCallback;
+
 import java.util.Scanner;
 
+import static main.util.PuzzlePrintUtils.printPuzzle;
 
-//created different methods to create the program
 
-//created a class to solve the sudoku project.
-//
+/**
+ * Contains all methods for handling sudoku puzzles
+ */
+public class Solver
+{
 
-public class Solver {
-    int[][] puzz = new int[9][9];
-    int[][] gen = new int[9][9];
-    Random rand;
+	/**
+	 * Instantiates a new Solver.
+	 */
+	public Solver()
+	{
+	}
 
-    //this method lets you input the number and it checks if it is right
-    //or wrong. by scanning the row and column for repeated num.
+	/**
+	 * Allows used to manually fill in puzzle
+	 * 
+	 * @param req the req
+	 */
+	public void playPuzzle(int[][] req)
+	{
+		int intInput = 1;
+		boolean hold = false;
 
-    public void playPuzzle() {
-        int intInput = 1;
-        boolean hold = false;
+		for (int row = 0; row < 9; row++)
+		{
+			for (int col = 0; col < 9; col++)
+			{
+				Scanner scanner = new Scanner(System.in);
+				while (hold == false)
+				{
+					if (req[row][col] == 0)
+					{
+						while (intInput > 0 && intInput <= 9)
+						{
+							System.out.print("input a number: ");
+							intInput = scanner.nextInt();
+							if (intInput > 0 && intInput <= 9)
+							{
+								break;
+							}
+						}
 
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                Scanner scanner = new Scanner(System.in);
-                while (hold == false) {
-                    while (intInput > 0 && intInput <= 9) {
-                        System.out.print("input a number: ");
-                        intInput = scanner.nextInt();
-                        if (intInput > 0 && intInput <= 9) {
-                            break;
-                        }
-                    }
+						hold = isAllowed(intInput, row, col, req);
+						if (hold == true)
+						{
+							System.out.println(intInput + " is valid");
+						} else
+						{
+							System.out.println(intInput + " not valid");
+						}
+					}
+					req[row][col] = intInput;
+					hold = false;
+					printPuzzle(req);
+				}
+			}
+		}
+	}
 
-                    hold = isAllowed(intInput, row, col, puzz);
-                    if (hold == true) {
-                        System.out.println(intInput + " is valid");
-                    } else {
-                        System.out.println(intInput + " not valid");
-                    }
+	/**
+	 * Returns
+	 * Look at the main follow the steps !!!!!
+	 * @param puzzle   the puzzle
+	 * @param callback the callback
+	 * @return the boolean
+	 */
+	public boolean solveWithPartial(int[][] puzzle, PuzzleCompleteCallback callback)
+	{
+		for (int row = 0; row < 9; row++)
+		{
+			for (int col = 0; col < 9; col++)
+			{
 
-                }
-                puzz[row][col] = intInput;
-                hold = false;
-                printPuzzle(puzz);
-            }
+				if (puzzle[row][col] == 0)
+				{
 
-        }
+					for (int num = 1; num <= 9; num++)
+					{
+						if (isAllowed(num, row, col, puzzle))
+						{
+							puzzle[row][col] = num;
+							if (solveWithPartial(puzzle, callback))
+							{
+								callback.OnPuzzleReady(puzzle);
+								return true;
+							} else
+							{
+								puzzle[row][col] = 0;
+							}
+						}
+					}
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
-    }
+	/**
+	 * Prints
+	 * Look at the main follow the steps !!!!
+	 * @param puzzle the puzzle
+	 * @return the boolean
+	 */
+	public boolean solveWithPartial(int[][] puzzle)
+	{
+		for (int row = 0; row < 9; row++)
+		{
+			for (int col = 0; col < 9; col++)
+			{
 
-    //lets you input a number
-    //checks whether its valid or not.
+				if (puzzle[row][col] == 0)
+				{
 
-    public void playPuzzle(int[][] req) {
-        int intInput = 1;
-        boolean hold = false;
+					for (int num = 1; num <= 9; num++)
+					{
+						if (isAllowed(num, row, col, puzzle))
+						{
+							puzzle[row][col] = num;
+							if (solveWithPartial(puzzle))
+							{
+								printPuzzle(puzzle);
+								return true;
+							} else
+							{
+								puzzle[row][col] = 0;
+							}
+						}
+					}
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                Scanner scanner = new Scanner(System.in);
-                while (hold == false) {
-                    if (req[row][col] == 0) {
-                        while (intInput > 0 && intInput <= 9) {
-                            System.out.print("input a number: ");
-                            intInput = scanner.nextInt();
-                            if (intInput > 0 && intInput <= 9) {
-                                break;
-                            }
-                        }
 
-                        hold = isAllowed(intInput, row, col, req);
-                        if (hold == true) {
-                            System.out.println(intInput + " is valid");
-                        } else {
-                            System.out.println(intInput + " not valid");
-                        }
-                    }
-                    req[row][col] = intInput;
-                    hold = false;
-                    printPuzzle(req);
-                }
+	/**
+	 * Is allowed boolean.
+	 *
+	 * @param value the value
+	 * @param row   the row
+	 * @param col   the col
+	 * @param arr   the arr
+	 * @return the boolean
+	 */
+	public boolean isAllowed(int value, int row, int col, int[][] arr)
+	{
+		return !(containedInRow(value, row, col, arr) || containedInCol(value, row, col, arr) || containedInBox(value, row, col, arr));
+	}
 
-            }
 
-        }
-    }
+	/**
+	 * Contained in row boolean.
+	 *
+	 * @param value the value
+	 * @param row   the row
+	 * @param col   the col
+	 * @param arr   the arr
+	 * @return the boolean
+	 */
+	public boolean containedInRow(int value, int row, int col, int[][] arr)
+	{
+		for (int i = 0; i < 9; i++)
+		{
+			if (arr[i][col] == value)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-    //constructor and getter
+	/**
+	 * Contained in col boolean.
+	 *
+	 * @param value the value
+	 * @param row   the row
+	 * @param col   the col
+	 * @param arr   the arr
+	 * @return the boolean
+	 */
+	public boolean containedInCol(int value, int row, int col, int[][] arr)
+	{
+		for (int i = 0; i < 9; i++)
+		{
+			if (arr[row][i] == value)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public Solver() {
-    }
 
-    public int[][] getGen() {
-        return gen;
-    }
+	/**
+	 * Contained in box boolean.
+	 * numbers contained in box.
+	 * @param value the value
+	 * @param row   the row
+	 * @param col   the col
+	 * @param arr   the arr
+	 * @return the boolean
+	 */
+	public boolean containedInBox(int value, int row, int col, int[][] arr)
+	{
+		int r = row - row % 3;
+		int c = col - col % 3;
 
-    // this method solves the sudoku problem pretty much
+		for (int i = r; i < r + 3; i++)
+		{
+			for (int j = c; j < c + 3; j++)
+			{
+				if (arr[i][j] == value)
+				{
+					return true;
+				}
+			}
+		}
 
-    public boolean solve() {
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                if (gen[row][col] == 0) {
-                    for (int num = 1; num <= 9; num++) {
-                        if (isAllowed(num, row, col, gen)) {
-                            gen[row][col] = num;
-                            if (solve()) {
-                                return true;
-                            } else {
-                                gen[row][col] = -1;
-                            }
-                        }
-                        System.out.println("\n\n");
-                        printPuzzle(gen);
-                    }
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    //this method checks whether the input numbers meet the requirements
-    //regarding numbers from 1-9 for rows, col, etc.
-
-    public boolean isAllowed(int value, int row, int col, int[][] arr) {
-        return !(containedInRow(value, row, col, arr) || containedInCol(value, row, col, arr) || containedInBox(value, row, col, arr));
-    }
-
-    //this method checks the numbers from 1-9 to see if they satisfy the
-    //the row requirements.
-
-    public boolean containedInRow(int value, int row, int col, int[][] arr) {
-        for (int i = 0; i < 9; i++) {
-            if (arr[i][col] == value) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //this method checks the numbers from 1-9 to see if they satisfy the
-    //the column requirements.
-
-    public boolean containedInCol(int value, int row, int col, int[][] arr) {
-        for (int i = 0; i < 9; i++) {
-            if (arr[row][i] == value) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //this method checks the numbers from 1-9 to see if they satisfy the
-    //the column requirements
-
-    public boolean containedInBox(int value, int row, int col, int[][] arr) {
-        int r = row - row % 3;
-        int c = col - col % 3;
-
-        for (int i = r; i < r + 3; i++) {
-            for (int j = c; j < c + 3; j++) {
-                if (arr[i][j] == value) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    // this method generates,use any number as long as it is in
-    //between 1-9
-
-    public int[] generateRandRow() {
-        int[] randRow = new int[10];
-        for (int i = 1; i < 10; i++) {
-            randRow[i] = rand.nextInt(10);
-        }
-
-        return randRow;
-    }
-
-    //this method is what is printing the puzzle
-
-    public void printPuzzle(int[][] was) {
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                System.out.print(" " + was[i][j] + " ");
-            }
-
-            System.out.println("");
-        }
-    }
+		return false;
+	}
 }
